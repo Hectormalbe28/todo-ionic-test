@@ -25,7 +25,7 @@
     </ion-item>
 
     <ion-list>
-      <ion-item *ngFor="let category of categories()">
+      <ion-item *ngFor="let category of pagedCategories()">
         <ion-label>{{ category.name }}</ion-label>
         <ion-button
           color="danger"
@@ -35,6 +35,20 @@
         </ion-button>
       </ion-item>
     </ion-list>
+
+    <ng-container *ngIf="totalCategoryPages() > 1">
+      <ion-item lines="none">
+        <ion-button slot="start" (click)="prevCatPage()" [disabled]="catCurrentPage() === 0">
+          Anterior
+        </ion-button>
+        <ion-label class="ion-text-center">
+          Página {{ catCurrentPage() + 1 }} / {{ totalCategoryPages() }}
+        </ion-label>
+        <ion-button slot="end" (click)="nextCatPage()" [disabled]="catCurrentPage() + 1 >= totalCategoryPages()">
+          Siguiente
+        </ion-button>
+      </ion-item>
+    </ng-container>
   </ng-container>
 
   <!-- lista de tareas y formulario -->
@@ -78,7 +92,7 @@
 
   <ion-list>
     <ion-item
-      *ngFor="let task of filteredTasks(); trackBy: trackByTask">
+      *ngFor="let task of pagedTasks(); trackBy: trackByTask">
       <ion-checkbox
         slot="start"
         [checked]="task.completed"
@@ -97,5 +111,19 @@
       </ion-button>
     </ion-item>
   </ion-list>
+
+  <ng-container *ngIf="totalPages() > 1">
+    <ion-item lines="none">
+      <ion-button slot="start" (click)="prevPage()" [disabled]="currentPage() === 0">
+        Anterior
+      </ion-button>
+      <ion-label class="ion-text-center">
+        Página {{ currentPage() + 1 }} / {{ totalPages() }}
+      </ion-label>
+      <ion-button slot="end" (click)="nextPage()" [disabled]="currentPage() + 1 >= totalPages()">
+        Siguiente
+      </ion-button>
+    </ion-item>
+  </ng-container>
 
 </ion-content>

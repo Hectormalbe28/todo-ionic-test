@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, computed, OnInit, ChangeDetectionStrategy, effect } from '@angular/core';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonInput, IonButton, IonList, IonCheckbox, IonLabel, IonSelectOption, IonSelect } from '@ionic/angular/standalone';
 import { TaskService } from '../services/data/task.service';
 import { CategoryService } from '../services/data/category.service';
@@ -50,11 +50,59 @@ export class HomePage implements OnInit {
       : all;
   });
 
+  // paginación para la lista de tareas
+  readonly pageSize = 5;
+  currentPage = signal(0);
+
+  totalPages = computed(() => {
+    const total = this.filteredTasks().length;
+    return Math.max(1, Math.ceil(total / this.pageSize));
+  });
+
+  pagedTasks = computed(() => {
+    const all = this.filteredTasks();
+    const start = this.currentPage() * this.pageSize;
+    return all.slice(start, start + this.pageSize);
+  });
+
+  // paginación para categorías cuando el flag esté activo
+  readonly catPageSize = 5;
+  catCurrentPage = signal(0);
+
+  totalCategoryPages = computed(() => {
+    const total = this.categories().length;
+    return Math.max(1, Math.ceil(total / this.catPageSize));
+  });
+
+  pagedCategories = computed(() => {
+    const all = this.categories();
+    const start = this.catCurrentPage() * this.catPageSize;
+    return all.slice(start, start + this.catPageSize);
+  });
+
   constructor(
     private taskService: TaskService,
     private categoryService: CategoryService,
     private featureFlagService: FeatureFlagService
-  ) {}
+  ) {
+    // cuando la lista filtrada de tareas cambia se vuelve a la primera página
+    effect(() => {
+      this.filteredTasks();
+      this.currentPage.set(0);
+    });
+
+    // también reseteamos si el filtro de categoría cambia
+    effect(() => {
+      this.selectedCategoryId();
+      this.currentPage.set(0);
+    });
+
+    // cuando cambian las categorías se reinicia la página de categorías
+    effect(() => {
+      this.categories();
+      this.catCurrentPage.set(0);
+    });
+  }
 
   ngOnInit() {
     // obtiene feature flag para mostrar categorías
@@ -74,6 +122,32 @@ export class HomePage implements OnInit {
 
   toggleTask(task: Task): void {
     this.taskService.toggleTask(task.id);
+  }
+
+  // manejadores de paginación de tareas
+  nextPage(): void {
+    if (this.currentPage() + 1 < this.totalPages()) {
+      this.currentPage.set(this.currentPage() + 1);
+    }
+  }
+
+  prevPage(): void {
+    if (this.currentPage() > 0) {
+      this.currentPage.set(this.currentPage() - 1);
+    }
+  }
+
+  // paginación de categorías
+  nextCatPage(): void {
+    if (this.catCurrentPage() + 1 < this.totalCategoryPages()) {
+      this.catCurrentPage.set(this.catCurrentPage() + 1);
+    }
+  }
+
+  prevCatPage(): void {
+    if (this.catCurrentPage() > 0) {
+      this.catCurrentPage.set(this.catCurrentPage() - 1);
+    }
   }
 
   deleteTask(taskId: string): void {
