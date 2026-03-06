@@ -5,6 +5,7 @@ import { Task } from '../models/task';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Category } from '../models/category';
+import { FirebaseService } from '../services/firebase.service';
 
 @Component({
   selector: 'app-home',
@@ -22,11 +23,18 @@ export class HomePage {
   selectedCategoryId: string = '';
   selectedCategoryForTask: string = '';
 
-  constructor(private storageService: StorageService) { }
+  categoriesEnabled: boolean = true;
+
+  constructor(private storageService: StorageService, private firebaseService: FirebaseService) { }
 
   ngOnInit() {
     this.loadTasks();
     this.loadCategories();
+    this.loadRemoteConfig();
+  }
+
+  async loadRemoteConfig() {
+    this.categoriesEnabled = await this.firebaseService.getFeatureFlag('enable_categories');
   }
 
   loadTasks() {
