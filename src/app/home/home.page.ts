@@ -117,8 +117,12 @@ export class HomePage implements OnInit {
   }
 
   async loadRemoteConfig(): Promise<void> {
-    const enabled = await this.featureFlagService.getFeatureFlag('enable_categories');
-    this.categoriesEnabled.set(enabled);
+    try {
+      const enabled = await this.featureFlagService.getFeatureFlag('enable_categories');
+      this.categoriesEnabled.set(enabled);
+    } catch {
+      this.categoriesEnabled.set(false);
+    }
   }
 
   addTask(): void {
