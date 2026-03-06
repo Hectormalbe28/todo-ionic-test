@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>
+    <ion-title class="ion-text-center">
       Todo App
     </ion-title>
   </ion-toolbar>
@@ -11,21 +11,30 @@
   <ng-container *ngIf="categoriesEnabled(); else soloTareas">
     <ion-tabs>
       <ion-tab-bar slot="top">
-        <ion-tab-button tab="cats">Categorías</ion-tab-button>
-        <ion-tab-button tab="tasks" selected>Tareas</ion-tab-button>
+        <ion-tab-button tab="cats">
+          <ion-icon name="list-outline"></ion-icon>
+          Categorías
+        </ion-tab-button>
+        <ion-tab-button tab="tasks" selected>
+          <ion-icon name="checkmark-done-outline"></ion-icon>
+          Tareas
+        </ion-tab-button>
       </ion-tab-bar>
 
       <ion-tab tab="cats">
-        <section>
-          <h2>Categorías</h2>
+        <section class="ion-padding-top ion-padding-bottom">
+          <h2 class="ion-margin-bottom ion-text-center">Categorías</h2>
 
-          <ion-item>
+          <ion-item class="add-item">
             <ion-input
               placeholder="Nueva categoría"
               [ngModel]="newCategoryName()"
               (ngModelChange)="newCategoryName.set($event)">
             </ion-input>
-            <ion-button (click)="addCategory()">Crear</ion-button>
+            <ion-button class="add-btn" fill="solid" color="primary" (click)="addCategory()">
+        <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+        Crear
+      </ion-button>
           </ion-item>
 
           <ion-list>
@@ -34,8 +43,11 @@
               <ion-button
                 color="danger"
                 fill="clear"
+                size="small"
+                slot="end"
+                aria-label="Eliminar categoría {{category.name}}"
                 (click)="deleteCategory(category.id)">
-                Eliminar
+                <ion-icon name="trash-outline"></ion-icon>
               </ion-button>
             </ion-item>
           </ion-list>
@@ -57,10 +69,10 @@
       </ion-tab>
 
       <ion-tab tab="tasks">
-        <section>
-          <h2>Tareas</h2>
+        <section class="ion-padding-top ion-padding-bottom">
+          <h2 class="ion-margin-bottom ion-text-center">Tareas</h2>
 
-          <ion-item>
+          <ion-item class="ion-margin-bottom">
             <ion-select
               placeholder="Filtrar por categoría"
               [ngModel]="selectedCategoryId()"
@@ -74,7 +86,7 @@
             </ion-select>
           </ion-item>
 
-          <ion-item>
+          <ion-item class="ion-margin-bottom">
             <ion-select
               placeholder="Seleccionar categoría"
               [ngModel]="selectedCategoryForTask()"
@@ -87,13 +99,13 @@
             </ion-select>
           </ion-item>
 
-          <ion-item>
+          <ion-item class="add-item">
             <ion-input
               placeholder="Nueva tarea"
               [ngModel]="newTaskTitle()"
               (ngModelChange)="newTaskTitle.set($event)">
             </ion-input>
-            <ion-button (click)="addTask()">Agregar</ion-button>
+            <ion-button class="add-btn" fill="solid" color="primary" (click)="addTask()">Agregar</ion-button>
           </ion-item>
 
           <ion-list>
@@ -112,8 +124,11 @@
               <ion-button
                 fill="clear"
                 color="danger"
+                size="small"
+                slot="end"
+                aria-label="Eliminar tarea {{task.title}}"
                 (click)="deleteTask(task.id)">
-                Eliminar
+                <ion-icon name="trash-outline"></ion-icon>
               </ion-button>
             </ion-item>
           </ion-list>
@@ -137,8 +152,8 @@
   </ng-container>
 
   <ng-template #soloTareas>
-    <section>
-      <h2>Tareas</h2>
+    <section class="ion-padding-top ion-padding-bottom">
+      <h2 class="ion-margin-bottom ion-text-center">Tareas</h2>
 
       <ion-item>
         <ion-select
@@ -154,7 +169,7 @@
         </ion-select>
       </ion-item>
 
-      <ion-item>
+      <ion-item class="ion-margin-bottom">
         <ion-select
           placeholder="Seleccionar categoría"
           [ngModel]="selectedCategoryForTask()"
@@ -167,13 +182,13 @@
         </ion-select>
       </ion-item>
 
-      <ion-item>
+      <ion-item class="add-item">
         <ion-input
           placeholder="Nueva tarea"
           [ngModel]="newTaskTitle()"
           (ngModelChange)="newTaskTitle.set($event)">
         </ion-input>
-        <ion-button (click)="addTask()">Agregar</ion-button>
+        <ion-button class="add-btn" fill="solid" color="primary" (click)="addTask()">Agregar</ion-button>
       </ion-item>
 
       <ion-list>
@@ -192,8 +207,11 @@
           <ion-button
             fill="clear"
             color="danger"
+            size="small"
+            slot="end"
+            aria-label="Eliminar tarea {{task.title}}"
             (click)="deleteTask(task.id)">
-            Eliminar
+            <ion-icon name="trash-outline"></ion-icon>
           </ion-button>
         </ion-item>
       </ion-list>

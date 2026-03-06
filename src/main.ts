@@ -5,6 +5,17 @@ import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalo
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 
+// register only the icons we actually use to avoid network-loading problems
+import { addIcons } from 'ionicons';
+import { trashOutline, addCircleOutline, listOutline, checkmarkDoneOutline } from 'ionicons/icons';
+
+addIcons({
+  'trash-outline': trashOutline,
+  'add-circle-outline': addCircleOutline,
+  'list-outline': listOutline,
+  'checkmark-done-outline': checkmarkDoneOutline,
+});
+
 bootstrapApplication(AppComponent, {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
