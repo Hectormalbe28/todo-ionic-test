@@ -8,95 +8,94 @@
 
 <ion-content class="ion-padding">
 
-  @if (categoriesEnabled)   {
-  <h2>Categorías</h2>
+  <!-- sección de categorías habilitada según flag -->
+  <ng-container *ngIf="categoriesEnabled()">
+    <h2>Categorías</h2>
 
-  <ion-item>
+    <ion-item>
+      <ion-input
+        placeholder="Nueva categoría"
+        [ngModel]="newCategoryName()"
+        (ngModelChange)="newCategoryName.set($event)">
+      </ion-input>
 
-    <ion-input placeholder="Nueva categoría" [(ngModel)]="newCategoryName">
-    </ion-input>
-
-    <ion-button (click)="addCategory()">
-      Crear
-    </ion-button>
-
-  </ion-item>
-
-  <ion-list>
-
-    <ion-item *ngFor="let category of categories">
-
-      <ion-label>{{category.name}}</ion-label>
-
-      <ion-button color="danger" fill="clear" (click)="deleteCategory(category.id)">
-        Eliminar
+      <ion-button (click)="addCategory()">
+        Crear
       </ion-button>
-
     </ion-item>
 
-  </ion-list>
+    <ion-list>
+      <ion-item *ngFor="let category of categories()">
+        <ion-label>{{ category.name }}</ion-label>
+        <ion-button
+          color="danger"
+          fill="clear"
+          (click)="deleteCategory(category.id)">
+          Eliminar
+        </ion-button>
+      </ion-item>
+    </ion-list>
+  </ng-container>
 
-  }
-
+  <!-- lista de tareas y formulario -->
   <h2>Tareas</h2>
   <ion-item>
-
-    <ion-select placeholder="Filtrar por categoría" [(ngModel)]="selectedCategoryId" (ionChange)="applyFilter()">
-
-      <ion-select-option value="">
-        Todas
+    <ion-select
+      placeholder="Filtrar por categoría"
+      [ngModel]="selectedCategoryId()"
+      (ngModelChange)="selectedCategoryId.set($event)">
+      <ion-select-option value="">Todas</ion-select-option>
+      <ion-select-option
+        *ngFor="let category of categories()"
+        [value]="category.id">
+        {{ category.name }}
       </ion-select-option>
-
-      <ion-select-option *ngFor="let category of categories" [value]="category.id">
-
-        {{category.name}}
-
-      </ion-select-option>
-
     </ion-select>
-
   </ion-item>
+
   <ion-item>
-
-    <ion-select placeholder="Seleccionar categoría" [(ngModel)]="selectedCategoryForTask">
-
-      <ion-select-option *ngFor="let category of categories" [value]="category.id">
-
-        {{category.name}}
-
+    <ion-select
+      placeholder="Seleccionar categoría"
+      [ngModel]="selectedCategoryForTask()"
+      (ngModelChange)="selectedCategoryForTask.set($event)">
+      <ion-select-option
+        *ngFor="let category of categories()"
+        [value]="category.id">
+        {{ category.name }}
       </ion-select-option>
-
     </ion-select>
-
   </ion-item>
 
 
   <ion-item>
-    <ion-input placeholder="Nueva tarea" [(ngModel)]="newTaskTitle">
+    <ion-input
+      placeholder="Nueva tarea"
+      [ngModel]="newTaskTitle()"
+      (ngModelChange)="newTaskTitle.set($event)">
     </ion-input>
-
-    <ion-button (click)="addTask()">
-      Agregar
-    </ion-button>
+    <ion-button (click)="addTask()">Agregar</ion-button>
   </ion-item>
 
   <ion-list>
-
-    <ion-item *ngFor="let task of filteredTasks; trackBy: trackByTask">
-
-      <ion-checkbox slot="start" [checked]="task.completed" (ionChange)="toggleTask(task)">
+    <ion-item
+      *ngFor="let task of filteredTasks(); trackBy: trackByTask">
+      <ion-checkbox
+        slot="start"
+        [checked]="task.completed"
+        (ionChange)="toggleTask(task)">
       </ion-checkbox>
-
-      <ion-label [style.textDecoration]="task.completed ? 'line-through' : 'none'">
-        {{task.title}}
+      <ion-label
+        [style.textDecoration]="
+          task.completed ? 'line-through' : 'none'">
+        {{ task.title }}
       </ion-label>
-
-      <ion-button fill="clear" color="danger" (click)="deleteTask(task.id)">
+      <ion-button
+        fill="clear"
+        color="danger"
+        (click)="deleteTask(task.id)">
         Eliminar
       </ion-button>
-
     </ion-item>
-
   </ion-list>
 
 </ion-content>

@@ -1,138 +1,96 @@
-import { Component } from '@angular/core';
+import { Component, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonInput, IonButton, IonList, IonCheckbox, IonLabel, IonSelectOption, IonSelect } from '@ionic/angular/standalone';
-import { StorageService } from '../services/storage.service';
-import { Task } from '../models/task';
+import { TaskService } from '../services/data/task.service';
+import { CategoryService } from '../services/data/category.service';
+import { FeatureFlagService } from '../services/remote/feature-flag.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Category } from '../models/category';
-import { FirebaseService } from '../services/firebase.service';
+import { Task } from '../models/task';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonInput, IonButton, IonList, IonCheckbox, IonLabel, IonSelectOption, IonSelect, CommonModule, FormsModule,],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonItem,
+    IonInput,
+    IonButton,
+    IonList,
+    IonCheckbox,
+    IonLabel,
+    IonSelectOption,
+    IonSelect,
+    CommonModule,
+    FormsModule,
+  ],
 })
-export class HomePage {
+export class HomePage implements OnInit {
+  // señales expuestas por los servicios de datos
+  readonly tasks = this.taskService.tasks;
+  readonly categories = this.categoryService.categories;
 
-  tasks: Task[] = [];
-  newTaskTitle: string = '';
-  categories: Category[] = [];
-  newCategoryName: string = '';
+  newTaskTitle = signal('');
+  newCategoryName = signal('');
 
-  selectedCategoryId: string = '';
-  selectedCategoryForTask: string = '';
+  selectedCategoryId = signal('');
+  selectedCategoryForTask = signal('');
 
-  categoriesEnabled: boolean = true;
+  categoriesEnabled = signal(false);
 
-  filteredTasks: Task[] = [];
+  filteredTasks = computed(() => {
+    const all = this.tasks();
+    const selected = this.selectedCategoryId();
+    return selected
+      ? all.filter((t: Task) => t.categoryId === selected)
+      : all;
+  });
 
-  constructor(private storageService: StorageService, private firebaseService: FirebaseService) { }
+  constructor(
+    private taskService: TaskService,
+    private categoryService: CategoryService,
+    private featureFlagService: FeatureFlagService
+  ) {}
 
   ngOnInit() {
-    this.loadTasks();
-    this.loadCategories();
+    // obtiene feature flag para mostrar categorías
     this.loadRemoteConfig();
   }
 
-  async loadRemoteConfig() {
-    this.categoriesEnabled = await this.firebaseService.getFeatureFlag('enable_categories');
+  async loadRemoteConfig(): Promise<void> {
+    const enabled = await this.featureFlagService.getFeatureFlag('enable_categories');
+    this.categoriesEnabled.set(enabled);
   }
 
-  loadTasks() {
-    this.tasks = this.storageService.getTasks();
-    this.applyFilter();
+  addTask(): void {
+    this.taskService.addTask(this.newTaskTitle(), this.selectedCategoryForTask());
+    this.newTaskTitle.set('');
+    this.selectedCategoryForTask.set('');
   }
 
-  applyFilter() {
-
-    if (!this.selectedCategoryId) {
-      this.filteredTasks = this.tasks;
-      return;
-    }
-
-    this.filteredTasks = this.tasks.filter(
-      task => task.categoryId === this.selectedCategoryId
-    );
-
+  toggleTask(task: Task): void {
+    this.taskService.toggleTask(task.id);
   }
 
-  addTask() {
-
-    if (!this.newTaskTitle.trim()) return;
-
-    const task: Task = {
-      id: Date.now().toString(),
-      title: this.newTaskTitle,
-      completed: false,
-      categoryId: this.selectedCategoryForTask
-    };
-
-    this.tasks.push(task);
-
-    this.storageService.saveTasks(this.tasks);
-
-    this.newTaskTitle = '';
-    this.selectedCategoryForTask = '';
+  deleteTask(taskId: string): void {
+    this.taskService.deleteTask(taskId);
   }
 
-  toggleTask(task: Task) {
-
-    task.completed = !task.completed;
-
-    this.storageService.saveTasks(this.tasks);
-
+  addCategory(): void {
+    this.categoryService.addCategory(this.newCategoryName());
+    this.newCategoryName.set('');
   }
 
-  deleteTask(taskId: string) {
-
-    this.tasks = this.tasks.filter(task => task.id !== taskId);
-
-    this.storageService.saveTasks(this.tasks);
-
-    this.applyFilter();
-
-  }
-
-  loadCategories() {
-    this.categories = this.storageService.getCategories();
-  }
-
-  addCategory() {
-
-    if (!this.newCategoryName.trim()) return;
-
-    const category: Category = {
-      id: Date.now().toString(),
-      name: this.newCategoryName
-    };
-
-    this.categories.push(category);
-
-    this.storageService.saveCategories(this.categories);
-
-    this.newCategoryName = '';
-
-  }
-
-  deleteCategory(categoryId: string) {
-
-    this.categories = this.categories.filter(category => category.id !== categoryId);
-
-    this.storageService.saveCategories(this.categories);
-
-  }
-
-  getfilteredTasks(): Task[] {
-
-    if (!this.selectedCategoryId) return this.tasks;
-
-    return this.tasks.filter(task => task.categoryId === this.selectedCategoryId);
-
+  deleteCategory(categoryId: string): void {
+    this.categoryService.deleteCategory(categoryId);
   }
 
   trackByTask(index: number, task: Task): string {
     return task.id;
   }
-
 }
+

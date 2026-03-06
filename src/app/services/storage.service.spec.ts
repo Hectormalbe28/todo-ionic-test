@@ -1,16 +1,15 @@
 import { TestBed } from '@angular/core/testing';
+import { LocalStorageService } from './data/local-storage.service';
 
-import { StorageService } from './storage.service';
-
-describe('Storage', () => {
-  let service: Storage;
+describe('LocalStorageService (root stub)', () => {
+  let service: LocalStorageService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(Storage);
+    service = TestBed.inject(LocalStorageService);
   });
 
-  it('should be created', () => {
+  it('should exist', () => {
     expect(service).toBeTruthy();
   });
 });

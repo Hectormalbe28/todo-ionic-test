@@ -1,27 +1,22 @@
 import { Injectable } from '@angular/core';
 import { initializeApp } from 'firebase/app';
 import { getRemoteConfig, fetchAndActivate, getValue } from 'firebase/remote-config';
-import { firebaseConfig } from '../../environments/firebase.config';
+import { firebaseConfig } from '../../../environments/firebase.config';
 
 @Injectable({
   providedIn: 'root'
 })
-export class FirebaseService {
-
-  remoteConfig;
+export class FeatureFlagService {
+  private remoteConfig: any;
 
   constructor() {
-
-    // Initialize Firebase
+    // Inicializa Firebase Remote Config con settings bajos de cache
     const app = initializeApp(firebaseConfig);
-
     this.remoteConfig = getRemoteConfig(app);
-
     this.remoteConfig.settings = {
       minimumFetchIntervalMillis: 0,
-      fetchTimeoutMillis: 60000
+      fetchTimeoutMillis: 60000,
     };
-
   }
 
   async getFeatureFlag(flagName: string): Promise<boolean> {
