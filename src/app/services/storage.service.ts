@@ -5,7 +5,7 @@ import { Category } from '../models/category';
 @Injectable({
   providedIn: 'root',
 })
-export class Storage {
+export class StorageService {
 
   private TASK_KEY = 'tasks';
   private CATEGORY_KEY = 'categories';
