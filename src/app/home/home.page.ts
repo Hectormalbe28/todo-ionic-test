@@ -25,6 +25,8 @@ export class HomePage {
 
   categoriesEnabled: boolean = true;
 
+  filteredTasks: Task[] = [];
+
   constructor(private storageService: StorageService, private firebaseService: FirebaseService) { }
 
   ngOnInit() {
@@ -39,6 +41,20 @@ export class HomePage {
 
   loadTasks() {
     this.tasks = this.storageService.getTasks();
+    this.applyFilter();
+  }
+
+  applyFilter() {
+
+    if (!this.selectedCategoryId) {
+      this.filteredTasks = this.tasks;
+      return;
+    }
+
+    this.filteredTasks = this.tasks.filter(
+      task => task.categoryId === this.selectedCategoryId
+    );
+
   }
 
   addTask() {
@@ -73,6 +89,8 @@ export class HomePage {
     this.tasks = this.tasks.filter(task => task.id !== taskId);
 
     this.storageService.saveTasks(this.tasks);
+
+    this.applyFilter();
 
   }
 
@@ -113,5 +131,8 @@ export class HomePage {
 
   }
 
+  trackByTask(index: number, task: Task): string {
+    return task.id;
+  }
 
 }

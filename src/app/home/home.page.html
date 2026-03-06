@@ -41,7 +41,7 @@
   <h2>Tareas</h2>
   <ion-item>
 
-    <ion-select placeholder="Filtrar por categoría" [(ngModel)]="selectedCategoryId">
+    <ion-select placeholder="Filtrar por categoría" [(ngModel)]="selectedCategoryId" (ionChange)="applyFilter()">
 
       <ion-select-option value="">
         Todas
@@ -82,7 +82,7 @@
 
   <ion-list>
 
-    <ion-item *ngFor="let task of getfilteredTasks()">
+    <ion-item *ngFor="let task of filteredTasks; trackBy: trackByTask">
 
       <ion-checkbox slot="start" [checked]="task.completed" (ionChange)="toggleTask(task)">
       </ion-checkbox>
