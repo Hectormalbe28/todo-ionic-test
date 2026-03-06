@@ -1,4 +1,4 @@
-import { Injectable, Signal, computed } from '@angular/core';
+import { Injectable, Signal, computed, inject } from '@angular/core';
 import { Task } from '../../models/task';
 import { LocalStorageService } from './local-storage.service';
 import { BaseDataService } from './base-data.service';
@@ -17,9 +17,9 @@ export class TaskService extends BaseDataService<Task> {
   // cantidad de tareas, derivada automáticamente
   taskCount = computed(() => this.data().length);
 
-  constructor(storage: LocalStorageService) {
+  constructor() {
     // clave en localStorage
-    super(storage, 'tasks');
+    super(inject(LocalStorageService), 'tasks');
   }
 
   /**

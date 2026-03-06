@@ -1,4 +1,4 @@
-import { Injectable, Signal } from '@angular/core';
+import { Injectable, Signal, inject } from '@angular/core';
 import { Category } from '../../models/category';
 import { LocalStorageService } from './local-storage.service';
 import { BaseDataService } from './base-data.service';
@@ -14,8 +14,8 @@ export class CategoryService extends BaseDataService<Category> {
     return this.data;
   }
 
-  constructor(storage: LocalStorageService) {
-    super(storage, 'categories');
+  constructor() {
+    super(inject(LocalStorageService), 'categories');
   }
 
   addCategory(name: string) {
@@ -25,6 +25,12 @@ export class CategoryService extends BaseDataService<Category> {
       name: name.trim(),
     };
     this.add(newCat);
+  }
+
+  updateCategory(id: string, name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    this.update(id, (cat) => ({ ...cat, name: trimmed }));
   }
 
   deleteCategory(id: string) {

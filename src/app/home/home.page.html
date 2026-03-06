@@ -7,13 +7,12 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-
   <ng-container *ngIf="categoriesEnabled(); else soloTareas">
     <ion-tabs>
       <ion-tab-bar slot="top">
         <ion-tab-button tab="cats">
           <ion-icon name="list-outline"></ion-icon>
-          Categorías
+          Categorias
         </ion-tab-button>
         <ion-tab-button tab="tasks" selected>
           <ion-icon name="checkmark-done-outline"></ion-icon>
@@ -23,32 +22,69 @@
 
       <ion-tab tab="cats">
         <section class="ion-padding-top ion-padding-bottom">
-          <h2 class="ion-margin-bottom ion-text-center">Categorías</h2>
+          <h2 class="ion-margin-bottom ion-text-center">Categorias</h2>
 
           <ion-item class="add-item">
             <ion-input
-              placeholder="Nueva categoría"
+              placeholder="Nueva categoria"
               [ngModel]="newCategoryName()"
               (ngModelChange)="newCategoryName.set($event)">
             </ion-input>
             <ion-button class="add-btn" fill="solid" color="primary" (click)="addCategory()">
-        <ion-icon slot="start" name="add-circle-outline"></ion-icon>
-        Crear
-      </ion-button>
+              <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+              Crear
+            </ion-button>
           </ion-item>
 
           <ion-list>
             <ion-item *ngFor="let category of pagedCategories()">
-              <ion-label>{{ category.name }}</ion-label>
-              <ion-button
-                color="danger"
-                fill="clear"
-                size="small"
-                slot="end"
-                aria-label="Eliminar categoría {{category.name}}"
-                (click)="deleteCategory(category.id)">
-                <ion-icon name="trash-outline"></ion-icon>
-              </ion-button>
+              <ng-container *ngIf="editingCategoryId() === category.id; else viewCategory">
+                <ion-input
+                  placeholder="Editar categoria"
+                  [ngModel]="editingCategoryName()"
+                  (ngModelChange)="editingCategoryName.set($event)">
+                </ion-input>
+                <ion-button
+                  color="primary"
+                  fill="clear"
+                  size="small"
+                  slot="end"
+                  aria-label="Guardar categoria {{ category.name }}"
+                  (click)="saveCategoryEdit()">
+                  Guardar
+                </ion-button>
+                <ion-button
+                  color="medium"
+                  fill="clear"
+                  size="small"
+                  slot="end"
+                  aria-label="Cancelar edicion de categoria {{ category.name }}"
+                  (click)="cancelEditCategory()">
+                  Cancelar
+                </ion-button>
+              </ng-container>
+
+              <ng-template #viewCategory>
+                <ion-label>{{ category.name }}</ion-label>
+                <ion-button
+                  color="primary"
+                  fill="clear"
+                  size="small"
+                  slot="end"
+                  aria-label="Editar categoria {{ category.name }}"
+                  (click)="startEditCategory(category.id, category.name)">
+                  Editar
+                </ion-button>
+                <ion-button
+                  color="danger"
+                  fill="clear"
+                  size="small"
+                  slot="end"
+                  aria-label="Eliminar categoria {{ category.name }}"
+                  (click)="deleteCategory(category.id)">
+                  <ion-icon name="trash-outline"></ion-icon>
+                </ion-button>
+              </ng-template>
             </ion-item>
           </ion-list>
 
@@ -58,7 +94,7 @@
                 Anterior
               </ion-button>
               <ion-label class="ion-text-center">
-                Página {{ catCurrentPage() + 1 }} / {{ totalCategoryPages() }}
+                Pagina {{ catCurrentPage() + 1 }} / {{ totalCategoryPages() }}
               </ion-label>
               <ion-button slot="end" (click)="nextCatPage()" [disabled]="catCurrentPage() + 1 >= totalCategoryPages()">
                 Siguiente
@@ -74,7 +110,7 @@
 
           <ion-item class="ion-margin-bottom">
             <ion-select
-              placeholder="Filtrar por categoría"
+              placeholder="Filtrar por categoria"
               [ngModel]="selectedCategoryId()"
               (ngModelChange)="selectedCategoryId.set($event)">
               <ion-select-option value="">Todas</ion-select-option>
@@ -88,7 +124,7 @@
 
           <ion-item class="ion-margin-bottom">
             <ion-select
-              placeholder="Seleccionar categoría"
+              placeholder="Seleccionar categoria"
               [ngModel]="selectedCategoryForTask()"
               (ngModelChange)="selectedCategoryForTask.set($event)">
               <ion-select-option
@@ -109,16 +145,13 @@
           </ion-item>
 
           <ion-list>
-            <ion-item
-              *ngFor="let task of pagedTasks(); trackBy: trackByTask">
+            <ion-item *ngFor="let task of pagedTasks(); trackBy: trackByTask">
               <ion-checkbox
                 slot="start"
                 [checked]="task.completed"
                 (ionChange)="toggleTask(task)">
               </ion-checkbox>
-              <ion-label
-                [style.textDecoration]="
-                  task.completed ? 'line-through' : 'none'">
+              <ion-label [style.textDecoration]="task.completed ? 'line-through' : 'none'">
                 {{ task.title }}
               </ion-label>
               <ion-button
@@ -126,7 +159,7 @@
                 color="danger"
                 size="small"
                 slot="end"
-                aria-label="Eliminar tarea {{task.title}}"
+                aria-label="Eliminar tarea {{ task.title }}"
                 (click)="deleteTask(task.id)">
                 <ion-icon name="trash-outline"></ion-icon>
               </ion-button>
@@ -139,7 +172,7 @@
                 Anterior
               </ion-button>
               <ion-label class="ion-text-center">
-                Página {{ currentPage() + 1 }} / {{ totalPages() }}
+                Pagina {{ currentPage() + 1 }} / {{ totalPages() }}
               </ion-label>
               <ion-button slot="end" (click)="nextPage()" [disabled]="currentPage() + 1 >= totalPages()">
                 Siguiente
@@ -157,7 +190,7 @@
 
       <ion-item>
         <ion-select
-          placeholder="Filtrar por categoría"
+          placeholder="Filtrar por categoria"
           [ngModel]="selectedCategoryId()"
           (ngModelChange)="selectedCategoryId.set($event)">
           <ion-select-option value="">Todas</ion-select-option>
@@ -171,7 +204,7 @@
 
       <ion-item class="ion-margin-bottom">
         <ion-select
-          placeholder="Seleccionar categoría"
+          placeholder="Seleccionar categoria"
           [ngModel]="selectedCategoryForTask()"
           (ngModelChange)="selectedCategoryForTask.set($event)">
           <ion-select-option
@@ -192,16 +225,13 @@
       </ion-item>
 
       <ion-list>
-        <ion-item
-          *ngFor="let task of pagedTasks(); trackBy: trackByTask">
+        <ion-item *ngFor="let task of pagedTasks(); trackBy: trackByTask">
           <ion-checkbox
             slot="start"
             [checked]="task.completed"
             (ionChange)="toggleTask(task)">
           </ion-checkbox>
-          <ion-label
-            [style.textDecoration]="
-              task.completed ? 'line-through' : 'none'">
+          <ion-label [style.textDecoration]="task.completed ? 'line-through' : 'none'">
             {{ task.title }}
           </ion-label>
           <ion-button
@@ -209,7 +239,7 @@
             color="danger"
             size="small"
             slot="end"
-            aria-label="Eliminar tarea {{task.title}}"
+            aria-label="Eliminar tarea {{ task.title }}"
             (click)="deleteTask(task.id)">
             <ion-icon name="trash-outline"></ion-icon>
           </ion-button>
@@ -222,7 +252,7 @@
             Anterior
           </ion-button>
           <ion-label class="ion-text-center">
-            Página {{ currentPage() + 1 }} / {{ totalPages() }}
+            Pagina {{ currentPage() + 1 }} / {{ totalPages() }}
           </ion-label>
           <ion-button slot="end" (click)="nextPage()" [disabled]="currentPage() + 1 >= totalPages()">
             Siguiente
@@ -231,5 +261,4 @@
       </ng-container>
     </section>
   </ng-template>
-
 </ion-content>

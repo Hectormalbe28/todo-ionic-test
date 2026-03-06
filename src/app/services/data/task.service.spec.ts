@@ -9,12 +9,12 @@ describe('TaskService', () => {
 
   beforeEach(() => {
     // configurar e inyectar servicios antes de cada prueba
+    localStorage.clear();
     TestBed.configureTestingModule({
       providers: [LocalStorageService],
     });
     service = TestBed.inject(TaskService);
     storage = TestBed.inject(LocalStorageService);
-    localStorage.clear();
   });
 
   it('debería crearse correctamente', () => {

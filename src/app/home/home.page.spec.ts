@@ -11,6 +11,7 @@ describe('HomePage', () => {
   let categoryService: any;
 
   beforeEach(async () => {
+    localStorage.clear();
     fixture = TestBed.createComponent(HomePage);
     component = fixture.componentInstance;
     taskService = TestBed.inject(TaskService);

@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit, ChangeDetectionStrategy, effect } from '@angular/core';
+import { Component, signal, computed, OnInit, ChangeDetectionStrategy, effect, inject } from '@angular/core';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonInput, IonButton, IonList, IonCheckbox, IonLabel, IonSelectOption, IonSelect, IonTabs, IonTabBar, IonTabButton, IonTab, IonIcon } from '@ionic/angular/standalone';
 import { TaskService } from '../services/data/task.service';
 import { CategoryService } from '../services/data/category.service';
@@ -35,12 +35,18 @@ import { Task } from '../models/task';
   ],
 })
 export class HomePage implements OnInit {
-  // señales expuestas por los servicios de datos
+  private readonly taskService = inject(TaskService);
+  private readonly categoryService = inject(CategoryService);
+  private readonly featureFlagService = inject(FeatureFlagService);
+
+  // senales expuestas por los servicios de datos
   readonly tasks = this.taskService.tasks;
   readonly categories = this.categoryService.categories;
 
   newTaskTitle = signal('');
   newCategoryName = signal('');
+  editingCategoryId = signal('');
+  editingCategoryName = signal('');
 
   selectedCategoryId = signal('');
   selectedCategoryForTask = signal('');
@@ -55,7 +61,7 @@ export class HomePage implements OnInit {
       : all;
   });
 
-  // paginación para la lista de tareas
+  // paginacion para la lista de tareas
   readonly pageSize = 5;
   currentPage = signal(0);
 
@@ -70,7 +76,7 @@ export class HomePage implements OnInit {
     return all.slice(start, start + this.pageSize);
   });
 
-  // paginación para categorías cuando el flag esté activo
+  // paginacion para categorias cuando el flag este activo
   readonly catPageSize = 5;
   catCurrentPage = signal(0);
 
@@ -85,24 +91,20 @@ export class HomePage implements OnInit {
     return all.slice(start, start + this.catPageSize);
   });
 
-  constructor(
-    private taskService: TaskService,
-    private categoryService: CategoryService,
-    private featureFlagService: FeatureFlagService
-  ) {
-    // cuando la lista filtrada de tareas cambia se vuelve a la primera página
+  constructor() {
+    // cuando la lista filtrada de tareas cambia se vuelve a la primera pagina
     effect(() => {
       this.filteredTasks();
       this.currentPage.set(0);
     });
 
-    // también reseteamos si el filtro de categoría cambia
+    // tambien reseteamos si el filtro de categoria cambia
     effect(() => {
       this.selectedCategoryId();
       this.currentPage.set(0);
     });
 
-    // cuando cambian las categorías se reinicia la página de categorías
+    // cuando cambian las categorias se reinicia la pagina de categorias
     effect(() => {
       this.categories();
       this.catCurrentPage.set(0);
@@ -110,7 +112,7 @@ export class HomePage implements OnInit {
   }
 
   ngOnInit() {
-    // obtiene feature flag para mostrar categorías
+    // obtiene feature flag para mostrar categorias
     this.loadRemoteConfig();
   }
 
@@ -129,7 +131,7 @@ export class HomePage implements OnInit {
     this.taskService.toggleTask(task.id);
   }
 
-  // manejadores de paginación de tareas
+  // manejadores de paginacion de tareas
   nextPage(): void {
     if (this.currentPage() + 1 < this.totalPages()) {
       this.currentPage.set(this.currentPage() + 1);
@@ -142,7 +144,7 @@ export class HomePage implements OnInit {
     }
   }
 
-  // paginación de categorías
+  // paginacion de categorias
   nextCatPage(): void {
     if (this.catCurrentPage() + 1 < this.totalCategoryPages()) {
       this.catCurrentPage.set(this.catCurrentPage() + 1);
@@ -164,7 +166,27 @@ export class HomePage implements OnInit {
     this.newCategoryName.set('');
   }
 
+  startEditCategory(categoryId: string, currentName: string): void {
+    this.editingCategoryId.set(categoryId);
+    this.editingCategoryName.set(currentName);
+  }
+
+  cancelEditCategory(): void {
+    this.editingCategoryId.set('');
+    this.editingCategoryName.set('');
+  }
+
+  saveCategoryEdit(): void {
+    const id = this.editingCategoryId();
+    if (!id) return;
+    this.categoryService.updateCategory(id, this.editingCategoryName());
+    this.cancelEditCategory();
+  }
+
   deleteCategory(categoryId: string): void {
+    if (this.editingCategoryId() === categoryId) {
+      this.cancelEditCategory();
+    }
     this.categoryService.deleteCategory(categoryId);
   }
 
@@ -172,4 +194,3 @@ export class HomePage implements OnInit {
     return task.id;
   }
 }
-
