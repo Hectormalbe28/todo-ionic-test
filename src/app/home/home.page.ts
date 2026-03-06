@@ -1,5 +1,5 @@
 import { Component, signal, computed, OnInit, ChangeDetectionStrategy, effect } from '@angular/core';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonInput, IonButton, IonList, IonCheckbox, IonLabel, IonSelectOption, IonSelect } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonInput, IonButton, IonList, IonCheckbox, IonLabel, IonSelectOption, IonSelect, IonTabs, IonTabBar, IonTabButton, IonTab } from '@ionic/angular/standalone';
 import { TaskService } from '../services/data/task.service';
 import { CategoryService } from '../services/data/category.service';
 import { FeatureFlagService } from '../services/remote/feature-flag.service';
@@ -27,6 +27,10 @@ import { Task } from '../models/task';
     IonSelect,
     CommonModule,
     FormsModule,
+    IonTabs,
+    IonTabBar,
+    IonTabButton,
+    IonTab
   ],
 })
 export class HomePage implements OnInit {
