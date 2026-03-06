@@ -1,25 +1,32 @@
 import { Component } from '@angular/core';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonInput, IonButton, IonList, IonCheckbox, IonLabel } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonInput, IonButton, IonList, IonCheckbox, IonLabel, IonSelectOption, IonSelect } from '@ionic/angular/standalone';
 import { StorageService } from '../services/storage.service';
 import { Task } from '../models/task';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Category } from '../models/category';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonInput, IonButton, IonList, IonCheckbox, IonLabel, CommonModule, FormsModule],
+  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonInput, IonButton, IonList, IonCheckbox, IonLabel, IonSelectOption, IonSelect, CommonModule, FormsModule,],
 })
 export class HomePage {
 
   tasks: Task[] = [];
   newTaskTitle: string = '';
+  categories: Category[] = [];
+  newCategoryName: string = '';
+
+  selectedCategoryId: string = '';
+  selectedCategoryForTask: string = '';
 
   constructor(private storageService: StorageService) { }
 
   ngOnInit() {
     this.loadTasks();
+    this.loadCategories();
   }
 
   loadTasks() {
@@ -33,7 +40,8 @@ export class HomePage {
     const task: Task = {
       id: Date.now().toString(),
       title: this.newTaskTitle,
-      completed: false
+      completed: false,
+      categoryId: this.selectedCategoryForTask
     };
 
     this.tasks.push(task);
@@ -41,6 +49,7 @@ export class HomePage {
     this.storageService.saveTasks(this.tasks);
 
     this.newTaskTitle = '';
+    this.selectedCategoryForTask = '';
   }
 
   toggleTask(task: Task) {
@@ -58,5 +67,43 @@ export class HomePage {
     this.storageService.saveTasks(this.tasks);
 
   }
+
+  loadCategories() {
+    this.categories = this.storageService.getCategories();
+  }
+
+  addCategory() {
+
+    if (!this.newCategoryName.trim()) return;
+
+    const category: Category = {
+      id: Date.now().toString(),
+      name: this.newCategoryName
+    };
+
+    this.categories.push(category);
+
+    this.storageService.saveCategories(this.categories);
+
+    this.newCategoryName = '';
+
+  }
+
+  deleteCategory(categoryId: string) {
+
+    this.categories = this.categories.filter(category => category.id !== categoryId);
+
+    this.storageService.saveCategories(this.categories);
+
+  }
+
+  getfilteredTasks(): Task[] {
+
+    if (!this.selectedCategoryId) return this.tasks;
+
+    return this.tasks.filter(task => task.categoryId === this.selectedCategoryId);
+
+  }
+
 
 }

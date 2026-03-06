@@ -8,10 +8,70 @@
 
 <ion-content class="ion-padding">
 
+  <h2>Categorías</h2>
+
   <ion-item>
-    <ion-input
-      placeholder="Nueva tarea"
-      [(ngModel)]="newTaskTitle">
+
+    <ion-input placeholder="Nueva categoría" [(ngModel)]="newCategoryName">
+    </ion-input>
+
+    <ion-button (click)="addCategory()">
+      Crear
+    </ion-button>
+
+  </ion-item>
+
+  <ion-list>
+
+    <ion-item *ngFor="let category of categories">
+
+      <ion-label>{{category.name}}</ion-label>
+
+      <ion-button color="danger" fill="clear" (click)="deleteCategory(category.id)">
+        Eliminar
+      </ion-button>
+
+    </ion-item>
+
+  </ion-list>
+
+
+
+  <h2>Tareas</h2>
+  <ion-item>
+
+    <ion-select placeholder="Filtrar por categoría" [(ngModel)]="selectedCategoryId">
+
+      <ion-select-option value="">
+        Todas
+      </ion-select-option>
+
+      <ion-select-option *ngFor="let category of categories" [value]="category.id">
+
+        {{category.name}}
+
+      </ion-select-option>
+
+    </ion-select>
+
+  </ion-item>
+  <ion-item>
+
+    <ion-select placeholder="Seleccionar categoría" [(ngModel)]="selectedCategoryForTask">
+
+      <ion-select-option *ngFor="let category of categories" [value]="category.id">
+
+        {{category.name}}
+
+      </ion-select-option>
+
+    </ion-select>
+
+  </ion-item>
+
+
+  <ion-item>
+    <ion-input placeholder="Nueva tarea" [(ngModel)]="newTaskTitle">
     </ion-input>
 
     <ion-button (click)="addTask()">
@@ -21,23 +81,16 @@
 
   <ion-list>
 
-    <ion-item *ngFor="let task of tasks">
+    <ion-item *ngFor="let task of getfilteredTasks()">
 
-      <ion-checkbox
-        slot="start"
-        [checked]="task.completed"
-        (ionChange)="toggleTask(task)">
+      <ion-checkbox slot="start" [checked]="task.completed" (ionChange)="toggleTask(task)">
       </ion-checkbox>
 
-      <ion-label
-        [style.textDecoration]="task.completed ? 'line-through' : 'none'">
+      <ion-label [style.textDecoration]="task.completed ? 'line-through' : 'none'">
         {{task.title}}
       </ion-label>
 
-      <ion-button
-        fill="clear"
-        color="danger"
-        (click)="deleteTask(task.id)">
+      <ion-button fill="clear" color="danger" (click)="deleteTask(task.id)">
         Eliminar
       </ion-button>
 
