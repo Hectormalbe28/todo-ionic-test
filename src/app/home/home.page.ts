@@ -1,5 +1,5 @@
 import { Component, signal, computed, OnInit, ChangeDetectionStrategy, effect, inject } from '@angular/core';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonInput, IonButton, IonList, IonCheckbox, IonLabel, IonSelectOption, IonSelect, IonTabs, IonTabBar, IonTabButton, IonTab, IonIcon } from '@ionic/angular/standalone';
+import { IonContent, IonItem, IonInput, IonButton, IonList, IonCheckbox, IonLabel, IonSelectOption, IonSelect, IonSegment, IonSegmentButton, IonIcon } from '@ionic/angular/standalone';
 import { TaskService } from '../services/data/task.service';
 import { CategoryService } from '../services/data/category.service';
 import { FeatureFlagService } from '../services/remote/feature-flag.service';
@@ -13,9 +13,6 @@ import { Task } from '../models/task';
   styleUrls: ['home.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    IonHeader,
-    IonToolbar,
-    IonTitle,
     IonContent,
     IonItem,
     IonInput,
@@ -27,10 +24,8 @@ import { Task } from '../models/task';
     IonSelect,
     CommonModule,
     FormsModule,
-    IonTabs,
-    IonTabBar,
-    IonTabButton,
-    IonTab,
+    IonSegment,
+    IonSegmentButton,
     IonIcon
   ],
 })
@@ -47,11 +42,25 @@ export class HomePage implements OnInit {
   newCategoryName = signal('');
   editingCategoryId = signal('');
   editingCategoryName = signal('');
+  newTaskError = computed(() => this.taskService.validateTaskTitle(this.newTaskTitle()));
+  newCategoryError = computed(() => this.categoryService.validateCategoryName(this.newCategoryName()));
+  editingCategoryError = computed(() => {
+    const id = this.editingCategoryId();
+    if (!id) return null;
+    return this.categoryService.validateCategoryName(this.editingCategoryName(), id);
+  });
 
   selectedCategoryId = signal('');
   selectedCategoryForTask = signal('');
+  activeTab = signal<'tasks' | 'cats'>('tasks');
 
   categoriesEnabled = signal(false);
+  hasCategories = computed(() => this.categories().length > 0);
+  pageSubtitle = computed(() =>
+    this.categoriesEnabled() && this.activeTab() === 'cats'
+      ? 'Lista de categorias'
+      : 'Lista de tareas'
+  );
 
   filteredTasks = computed(() => {
     const all = this.tasks();
@@ -120,12 +129,21 @@ export class HomePage implements OnInit {
     try {
       const enabled = await this.featureFlagService.getFeatureFlag('enable_categories');
       this.categoriesEnabled.set(enabled);
+      if (!enabled) {
+        this.activeTab.set('tasks');
+      }
     } catch {
       this.categoriesEnabled.set(false);
+      this.activeTab.set('tasks');
     }
   }
 
+  setActiveTab(tab: 'tasks' | 'cats'): void {
+    this.activeTab.set(tab);
+  }
+
   addTask(): void {
+    if (this.newTaskError()) return;
     this.taskService.addTask(this.newTaskTitle(), this.selectedCategoryForTask());
     this.newTaskTitle.set('');
     this.selectedCategoryForTask.set('');
@@ -166,6 +184,7 @@ export class HomePage implements OnInit {
   }
 
   addCategory(): void {
+    if (this.newCategoryError()) return;
     this.categoryService.addCategory(this.newCategoryName());
     this.newCategoryName.set('');
   }
@@ -183,6 +202,7 @@ export class HomePage implements OnInit {
   saveCategoryEdit(): void {
     const id = this.editingCategoryId();
     if (!id) return;
+    if (this.editingCategoryError()) return;
     this.categoryService.updateCategory(id, this.editingCategoryName());
     this.cancelEditCategory();
   }

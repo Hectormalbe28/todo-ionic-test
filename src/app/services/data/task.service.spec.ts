@@ -43,7 +43,7 @@ describe('TaskService', () => {
   });
 
   it('persiste los cambios en localStorage', () => {
-    service.addTask('x', '');
+    service.addTask('tarea demo', '');
     const raw = localStorage.getItem('tasks');
     expect(raw).toBeTruthy();
     const parsed: Task[] = JSON.parse(raw!);

@@ -1,0 +1,96 @@
+.page-title {
+  margin: 8px 0 4px;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.page-subtitle {
+  margin: 0 0 16px;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.content-panel {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  padding: 8px;
+}
+
+.list-panel {
+  margin-top: 12px;
+}
+
+.filter-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.create-hint {
+  margin: 6px 8px 10px;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.empty-state {
+  margin: 14px 8px 8px;
+  text-align: center;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.field-error {
+  margin: 6px 10px 2px;
+  font-size: 12px;
+  color: #b91c1c;
+}
+
+.add-icon-btn {
+  --border-radius: 999px;
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+}
+
+.pager-icon-btn {
+  --border-radius: 999px;
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+}
+
+.action-icon-btn {
+  --border-radius: 999px;
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+.action-edit-btn {
+  --background: #eaf2ff;
+  --background-hover: #dbeafe;
+  --color: #1d4ed8;
+}
+
+.action-delete-btn {
+  --background: #fef2f2;
+  --background-hover: #fee2e2;
+  --color: #b91c1c;
+}
+
+.action-save-btn {
+  --background: #ecfdf5;
+  --background-hover: #dcfce7;
+  --color: #047857;
+}
+
+.action-cancel-btn {
+  --background: #f3f4f6;
+  --background-hover: #e5e7eb;
+  --color: #374151;
+}

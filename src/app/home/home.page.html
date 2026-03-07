@@ -1,127 +1,129 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title class="ion-text-center">
-      Todo App
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content class="ion-padding">
+  <h1 class="page-title ion-text-center">Agenda</h1>
+  <p class="page-subtitle ion-text-center">{{ pageSubtitle() }}</p>
   <ng-container *ngIf="categoriesEnabled(); else soloTareas">
-    <ion-tabs>
-      <ion-tab-bar slot="top">
-        <ion-tab-button tab="cats">
-          <ion-icon name="list-outline"></ion-icon>
-          Categorias
-        </ion-tab-button>
-        <ion-tab-button tab="tasks" selected>
-          <ion-icon name="checkmark-done-outline"></ion-icon>
-          Tareas
-        </ion-tab-button>
-      </ion-tab-bar>
+    <ion-segment [value]="activeTab()" (ionChange)="setActiveTab($event.detail.value === 'cats' ? 'cats' : 'tasks')">
+      <ion-segment-button value="cats" aria-label="Ir a categorias">
+        <ion-icon name="list-outline" aria-hidden="true"></ion-icon>
+      </ion-segment-button>
+      <ion-segment-button value="tasks" aria-label="Ir a tareas">
+        <ion-icon name="checkmark-done-outline" aria-hidden="true"></ion-icon>
+      </ion-segment-button>
+    </ion-segment>
 
-      <ion-tab tab="cats">
-        <section class="ion-padding-top ion-padding-bottom">
-          <h2 class="ion-margin-bottom ion-text-center">Categorias</h2>
+    <section class="ion-padding-top ion-padding-bottom" *ngIf="activeTab() === 'cats'; else tasksSection">
+      <div class="content-panel">
+        <ion-item class="add-item">
+          <ion-input
+            placeholder="Nueva categoria"
+            [ngModel]="newCategoryName()"
+            (ngModelChange)="newCategoryName.set($event)">
+          </ion-input>
+          <ion-button
+            class="add-icon-btn"
+            fill="solid"
+            color="primary"
+            aria-label="Crear categoria"
+            [disabled]="!!newCategoryError()"
+            (click)="addCategory()">
+            <ion-icon name="add-circle-outline"></ion-icon>
+          </ion-button>
+        </ion-item>
+        <p class="field-error" *ngIf="newCategoryError()">{{ newCategoryError() }}</p>
+      </div>
 
-          <ion-item class="add-item">
-            <ion-input
-              placeholder="Nueva categoria"
-              [ngModel]="newCategoryName()"
-              (ngModelChange)="newCategoryName.set($event)">
-            </ion-input>
-            <ion-button class="add-btn" fill="solid" color="primary" (click)="addCategory()">
-              <ion-icon slot="start" name="add-circle-outline"></ion-icon>
-              Crear
+      <div class="content-panel list-panel">
+        <p class="empty-state" *ngIf="categories().length === 0">No hay ninguna categoria</p>
+        <ion-list>
+          <ion-item *ngFor="let category of pagedCategories()">
+            <ng-container *ngIf="editingCategoryId() === category.id; else viewCategory">
+              <ion-input
+                placeholder="Editar categoria"
+                [ngModel]="editingCategoryName()"
+                (ngModelChange)="editingCategoryName.set($event)">
+              </ion-input>
+              <ion-button
+                class="action-icon-btn action-save-btn"
+                fill="solid"
+                slot="end"
+                aria-label="Guardar categoria {{ category.name }}"
+                [disabled]="!!editingCategoryError()"
+                (click)="saveCategoryEdit()">
+                <ion-icon name="checkmark-outline"></ion-icon>
+              </ion-button>
+              <ion-button
+                class="action-icon-btn action-cancel-btn"
+                fill="solid"
+                slot="end"
+                aria-label="Cancelar edicion de categoria {{ category.name }}"
+                (click)="cancelEditCategory()">
+                <ion-icon name="close-outline"></ion-icon>
+              </ion-button>
+            </ng-container>
+            <p class="field-error" *ngIf="editingCategoryId() === category.id && editingCategoryError()">
+              {{ editingCategoryError() }}
+            </p>
+
+            <ng-template #viewCategory>
+              <ion-label>{{ category.name }}</ion-label>
+              <ion-button
+                class="action-icon-btn action-edit-btn"
+                fill="solid"
+                slot="end"
+                aria-label="Editar categoria {{ category.name }}"
+                (click)="startEditCategory(category.id, category.name)">
+                <ion-icon name="create-outline"></ion-icon>
+              </ion-button>
+              <ion-button
+                class="action-icon-btn action-delete-btn"
+                fill="solid"
+                slot="end"
+                aria-label="Eliminar categoria {{ category.name }}"
+                (click)="deleteCategory(category.id)">
+                <ion-icon name="trash-outline"></ion-icon>
+              </ion-button>
+            </ng-template>
+          </ion-item>
+        </ion-list>
+
+        <ng-container *ngIf="totalCategoryPages() > 1">
+          <ion-item lines="none">
+            <ion-button
+              class="pager-icon-btn"
+              slot="start"
+              fill="solid"
+              color="primary"
+              aria-label="Pagina anterior de categorias"
+              (click)="prevCatPage()"
+              [disabled]="catCurrentPage() === 0">
+              <ion-icon name="chevron-back-outline"></ion-icon>
+            </ion-button>
+            <ion-label class="ion-text-center">
+              {{ catCurrentPage() + 1 }} / {{ totalCategoryPages() }}
+            </ion-label>
+            <ion-button
+              class="pager-icon-btn"
+              slot="end"
+              fill="solid"
+              color="primary"
+              aria-label="Pagina siguiente de categorias"
+              (click)="nextCatPage()"
+              [disabled]="catCurrentPage() + 1 >= totalCategoryPages()">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </ion-item>
+        </ng-container>
+      </div>
+    </section>
+  </ng-container>
 
-          <ion-list>
-            <ion-item *ngFor="let category of pagedCategories()">
-              <ng-container *ngIf="editingCategoryId() === category.id; else viewCategory">
-                <ion-input
-                  placeholder="Editar categoria"
-                  [ngModel]="editingCategoryName()"
-                  (ngModelChange)="editingCategoryName.set($event)">
-                </ion-input>
-                <ion-button
-                  color="primary"
-                  fill="clear"
-                  size="small"
-                  slot="end"
-                  aria-label="Guardar categoria {{ category.name }}"
-                  (click)="saveCategoryEdit()">
-                  Guardar
-                </ion-button>
-                <ion-button
-                  color="medium"
-                  fill="clear"
-                  size="small"
-                  slot="end"
-                  aria-label="Cancelar edicion de categoria {{ category.name }}"
-                  (click)="cancelEditCategory()">
-                  Cancelar
-                </ion-button>
-              </ng-container>
-
-              <ng-template #viewCategory>
-                <ion-label>{{ category.name }}</ion-label>
-                <ion-button
-                  color="primary"
-                  fill="clear"
-                  size="small"
-                  slot="end"
-                  aria-label="Editar categoria {{ category.name }}"
-                  (click)="startEditCategory(category.id, category.name)">
-                  Editar
-                </ion-button>
-                <ion-button
-                  color="danger"
-                  fill="clear"
-                  size="small"
-                  slot="end"
-                  aria-label="Eliminar categoria {{ category.name }}"
-                  (click)="deleteCategory(category.id)">
-                  <ion-icon name="trash-outline"></ion-icon>
-                </ion-button>
-              </ng-template>
-            </ion-item>
-          </ion-list>
-
-          <ng-container *ngIf="totalCategoryPages() > 1">
-            <ion-item lines="none">
-              <ion-button slot="start" (click)="prevCatPage()" [disabled]="catCurrentPage() === 0">
-                Anterior
-              </ion-button>
-              <ion-label class="ion-text-center">
-                Pagina {{ catCurrentPage() + 1 }} / {{ totalCategoryPages() }}
-              </ion-label>
-              <ion-button slot="end" (click)="nextCatPage()" [disabled]="catCurrentPage() + 1 >= totalCategoryPages()">
-                Siguiente
-              </ion-button>
-            </ion-item>
-          </ng-container>
-        </section>
-      </ion-tab>
-
-      <ion-tab tab="tasks">
-        <section class="ion-padding-top ion-padding-bottom">
-          <h2 class="ion-margin-bottom ion-text-center">Tareas</h2>
-
-          <ion-item class="ion-margin-bottom">
-            <ion-select
-              placeholder="Filtrar por categoria"
-              [ngModel]="selectedCategoryId()"
-              (ngModelChange)="selectedCategoryId.set($event)">
-              <ion-select-option value="">Todas</ion-select-option>
-              <ion-select-option
-                *ngFor="let category of categories()"
-                [value]="category.id">
-                {{ category.name }}
-              </ion-select-option>
-            </ion-select>
-          </ion-item>
-
+  <ng-template #tasksSection>
+    <section class="ion-padding-top ion-padding-bottom">
+      <div class="content-panel">
+        <ng-container *ngIf="categoriesEnabled() && hasCategories()">
+          <p class="create-hint">
+            Puedes seleccionar una categoria para que la nueva tarea quede enlazada a la misma.
+          </p>
           <ion-item class="ion-margin-bottom">
             <ion-select
               placeholder="Seleccionar categoria"
@@ -134,131 +136,99 @@
               </ion-select-option>
             </ion-select>
           </ion-item>
+        </ng-container>
 
-          <ion-item class="add-item">
-            <ion-input
-              placeholder="Nueva tarea"
-              [ngModel]="newTaskTitle()"
-              (ngModelChange)="newTaskTitle.set($event)">
-            </ion-input>
-            <ion-button class="add-btn" fill="solid" color="primary" (click)="addTask()">Agregar</ion-button>
-          </ion-item>
-
-          <ion-list>
-            <ion-item *ngFor="let task of pagedTasks(); trackBy: trackByTask">
-              <ion-checkbox
-                slot="start"
-                [checked]="task.completed"
-                (ionChange)="toggleTask(task)">
-              </ion-checkbox>
-              <ion-label [style.textDecoration]="task.completed ? 'line-through' : 'none'">
-                {{ task.title }}
-              </ion-label>
-              <ion-button
-                fill="clear"
-                color="danger"
-                size="small"
-                slot="end"
-                aria-label="Eliminar tarea {{ task.title }}"
-                (click)="deleteTask(task.id)">
-                <ion-icon name="trash-outline"></ion-icon>
-              </ion-button>
-            </ion-item>
-          </ion-list>
-
-          <ng-container *ngIf="totalPages() > 1">
-            <ion-item lines="none">
-              <ion-button slot="start" (click)="prevPage()" [disabled]="currentPage() === 0">
-                Anterior
-              </ion-button>
-              <ion-label class="ion-text-center">
-                Pagina {{ currentPage() + 1 }} / {{ totalPages() }}
-              </ion-label>
-              <ion-button slot="end" (click)="nextPage()" [disabled]="currentPage() + 1 >= totalPages()">
-                Siguiente
-              </ion-button>
-            </ion-item>
-          </ng-container>
-        </section>
-      </ion-tab>
-    </ion-tabs>
-  </ng-container>
-
-  <ng-template #soloTareas>
-    <section class="ion-padding-top ion-padding-bottom">
-      <h2 class="ion-margin-bottom ion-text-center">Tareas</h2>
-
-      <ion-item>
-        <ion-select
-          placeholder="Filtrar por categoria"
-          [ngModel]="selectedCategoryId()"
-          (ngModelChange)="selectedCategoryId.set($event)">
-          <ion-select-option value="">Todas</ion-select-option>
-          <ion-select-option
-            *ngFor="let category of categories()"
-            [value]="category.id">
-            {{ category.name }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
-
-      <ion-item class="ion-margin-bottom">
-        <ion-select
-          placeholder="Seleccionar categoria"
-          [ngModel]="selectedCategoryForTask()"
-          (ngModelChange)="selectedCategoryForTask.set($event)">
-          <ion-select-option
-            *ngFor="let category of categories()"
-            [value]="category.id">
-            {{ category.name }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
-
-      <ion-item class="add-item">
-        <ion-input
-          placeholder="Nueva tarea"
-          [ngModel]="newTaskTitle()"
-          (ngModelChange)="newTaskTitle.set($event)">
-        </ion-input>
-        <ion-button class="add-btn" fill="solid" color="primary" (click)="addTask()">Agregar</ion-button>
-      </ion-item>
-
-      <ion-list>
-        <ion-item *ngFor="let task of pagedTasks(); trackBy: trackByTask">
-          <ion-checkbox
-            slot="start"
-            [checked]="task.completed"
-            (ionChange)="toggleTask(task)">
-          </ion-checkbox>
-          <ion-label [style.textDecoration]="task.completed ? 'line-through' : 'none'">
-            {{ task.title }}
-          </ion-label>
+        <ion-item class="add-item">
+          <ion-input
+            placeholder="Nueva tarea"
+            [ngModel]="newTaskTitle()"
+            (ngModelChange)="newTaskTitle.set($event)">
+          </ion-input>
           <ion-button
-            fill="clear"
-            color="danger"
-            size="small"
-            slot="end"
-            aria-label="Eliminar tarea {{ task.title }}"
-            (click)="deleteTask(task.id)">
-            <ion-icon name="trash-outline"></ion-icon>
+            class="add-icon-btn"
+            fill="solid"
+            color="primary"
+            aria-label="Crear tarea"
+            [disabled]="!!newTaskError()"
+            (click)="addTask()">
+            <ion-icon name="add-circle-outline"></ion-icon>
           </ion-button>
         </ion-item>
-      </ion-list>
+        <p class="field-error" *ngIf="newTaskError()">{{ newTaskError() }}</p>
+      </div>
 
-      <ng-container *ngIf="totalPages() > 1">
-        <ion-item lines="none">
-          <ion-button slot="start" (click)="prevPage()" [disabled]="currentPage() === 0">
-            Anterior
-          </ion-button>
-          <ion-label class="ion-text-center">
-            Pagina {{ currentPage() + 1 }} / {{ totalPages() }}
-          </ion-label>
-          <ion-button slot="end" (click)="nextPage()" [disabled]="currentPage() + 1 >= totalPages()">
-            Siguiente
-          </ion-button>
+      <ng-container *ngIf="categoriesEnabled() && hasCategories()">
+        <p class="filter-label ion-margin-top ion-margin-bottom">Filtro por categorias</p>
+        <ion-item class="ion-margin-bottom">
+          <ion-select
+            placeholder="Filtrar por categoria"
+            [ngModel]="selectedCategoryId()"
+            (ngModelChange)="selectedCategoryId.set($event)">
+            <ion-select-option value="">Todas</ion-select-option>
+            <ion-select-option
+              *ngFor="let category of categories()"
+              [value]="category.id">
+              {{ category.name }}
+            </ion-select-option>
+          </ion-select>
         </ion-item>
       </ng-container>
+
+      <div class="content-panel list-panel">
+        <p class="empty-state" *ngIf="filteredTasks().length === 0">No hay ninguna tarea</p>
+        <ion-list>
+          <ion-item *ngFor="let task of pagedTasks(); trackBy: trackByTask">
+            <ion-checkbox
+              slot="start"
+              [checked]="task.completed"
+              (ionChange)="toggleTask(task)">
+            </ion-checkbox>
+            <ion-label [style.textDecoration]="task.completed ? 'line-through' : 'none'">
+              {{ task.title }}
+            </ion-label>
+            <ion-button
+              class="action-icon-btn action-delete-btn"
+              fill="solid"
+              slot="end"
+              aria-label="Eliminar tarea {{ task.title }}"
+              (click)="deleteTask(task.id)">
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+
+        <ng-container *ngIf="totalPages() > 1">
+          <ion-item lines="none">
+            <ion-button
+              class="pager-icon-btn"
+              slot="start"
+              fill="solid"
+              color="primary"
+              aria-label="Pagina anterior de tareas"
+              (click)="prevPage()"
+              [disabled]="currentPage() === 0">
+              <ion-icon name="chevron-back-outline"></ion-icon>
+            </ion-button>
+            <ion-label class="ion-text-center">
+              {{ currentPage() + 1 }} / {{ totalPages() }}
+            </ion-label>
+            <ion-button
+              class="pager-icon-btn"
+              slot="end"
+              fill="solid"
+              color="primary"
+              aria-label="Pagina siguiente de tareas"
+              (click)="nextPage()"
+              [disabled]="currentPage() + 1 >= totalPages()">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ng-container>
+      </div>
     </section>
+  </ng-template>
+
+  <ng-template #soloTareas>
+    <ng-container *ngTemplateOutlet="tasksSection"></ng-container>
   </ng-template>
 </ion-content>

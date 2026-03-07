@@ -64,7 +64,7 @@ describe('HomePage', () => {
     beforeEach(() => {
       // add 45 categories
       for (let i = 0; i < 45; i++) {
-        categoryService.addCategory('c' + i);
+        categoryService.addCategory('cat' + i);
       }
     });
 

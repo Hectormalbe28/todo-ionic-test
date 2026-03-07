@@ -25,15 +25,35 @@ export class TaskService extends BaseDataService<Task> {
   /**
    * Crea y guarda una nueva tarea si el título no está en blanco.
    */
-  addTask(title: string, categoryId: string | undefined) {
-    if (!title.trim()) return;
+  private normalizeTitle(title: string): string {
+    return title.trim().toLowerCase();
+  }
+
+  validateTaskTitle(title: string): string | null {
+    const trimmed = title.trim();
+    if (!trimmed) return 'El nombre de la tarea es obligatorio.';
+    if (trimmed.length < 3) return 'La tarea debe tener al menos 3 caracteres.';
+
+    const normalized = this.normalizeTitle(trimmed);
+    const exists = this.data().some((task) => this.normalizeTitle(task.title) === normalized);
+    if (exists) return 'Ya existe una tarea con ese nombre.';
+
+    return null;
+  }
+
+  addTask(title: string, categoryId: string | undefined): boolean {
+    const validationError = this.validateTaskTitle(title);
+    if (validationError) return false;
+
+    const trimmed = title.trim();
     const newTask: Task = {
       id: Date.now().toString(),
-      title: title.trim(),
+      title: trimmed,
       completed: false,
       categoryId,
     };
     this.add(newTask);
+    return true;
   }
 
   toggleTask(id: string) {
